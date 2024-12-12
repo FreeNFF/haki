@@ -1,4 +1,3 @@
-from audioop import avg
 import requests
 import json
 
@@ -17,8 +16,8 @@ try:#get pieprasījums uz API
             print(country_name)
         
         #izveido kopējo valsts nosaukumu
-        valsts_daudzums = len(country_name)
-        print(f"Kopā ir {valsts_daudzums} valstis.")
+        valsts_daudzums = len(countries_data)
+        print(f"\nKopā ir {valsts_daudzums} valstis.")
 
         total_population = sum(country.get("population", 0) for country in countries_data)
         #avarega_civilians = avg(total_popilation)
@@ -28,11 +27,33 @@ try:#get pieprasījums uz API
         #izvada valsti ar visvairāk iedzīvotājiem
         largest_pop_c = max(countries_data, key=lambda x: x.get("population", 0))
         largest_pop_n = largest_pop_c.get("name", {}).get("common","Nezināms nosaukums")
-        largest_pop = largest_pop_c("population", 0)
-        print(f"Valsts ar visvairāk iedzīvotājiem un to skaitu: {largest_pop_n} ({largest_pop:,.0}) iedzīvotāji")
+        largest_pop = largest_pop_c.get("population", 0)
+        print(f"Valsts ar visvairāk iedzīvotājiem un to skaitu: {largest_pop_n} ({largest_pop}) iedzīvotāji")
 
         #izvada visu valstu kopējo platību
         total_area = sum(country.get("area", 0) for country in countries_data)
-        print(f"\n Visu valstu kopējā platība: {total_area:,.0} kvadrātkilometri")
+        print(f"\nVisu valstu kopējā platība: {total_area:,.0f} kvadrātkilometri")
 
+        #izvada info par Latviju
         latvia_info = next((country for country in countries_data if country.get("name", {}).get ("common")=="Latvia"), None) 
+
+        #
+        if latvia_info:
+            #apakšreģions
+            subregion = latvia_info.get("subregion", "Nav pieejams")
+            print(f"\nLatvijas apakšreģions: {subregion}")
+
+            #robežvalstu kodi
+            borders = latvia_info.get("borders","Nav pieejami robežvalstu kodi")
+            print(f"Latvijas robežvalstu kodi: {borders}")
+        
+        else:
+            print("Latvija nav atrasta valstu sarakstā.")
+        
+    else:
+        print(f"Pieprasījuma kļūda. Statusa kods: {response.status_code}")
+
+except requests.exceptions.RequestException as e:
+    print(f"Notikusi kļūda pieprasījuma {e}")
+
+
